@@ -684,7 +684,9 @@
            $('#practice-questions-next-button').removeClass('visibility-hidden');   
            $('#practice-questions-ques-num').val('');
            
-           $("#practice-questions-toggle-answer").val('off').slider('refresh');
+           try{
+           		$("#practice-questions-toggle-answer").val('off').slider('refresh');
+           }catch(e){}
            $('#practice-questions-answer-info').addClass('display-none');
            $('#practice-questions-explanation').addClass('display-none');
   
