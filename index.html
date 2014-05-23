@@ -67,7 +67,7 @@
          function onPause(){
            currentPage = getCurrentPage();
            if(currentPage == '#exam-page'){
-              timer.stop();
+              timer.pause();
            }
             
          }
@@ -80,7 +80,11 @@
          }
 
          function onOnline(){
-            if(localStorage.getItem('user-name')){
+			getRankIfNA();
+         }
+         
+         function getRankIfNA(){
+			if(localStorage.getItem('user-name')){
               if(localStorage.getItem('user-score')){
                   user_name = localStorage.getItem("user-name");
                   user_email = localStorage.getItem("user-email");
@@ -111,11 +115,13 @@
                   });
                 
               }//end of getItem('user-score')
-            }
-         }
+            }         	
+         }// end of getRankIfNA()
 
 
          $(document).ready(function(){
+         
+         	getRankIfNA();
 
            $('input[type=checkbox]').click(function(){
              if(currentExam == 1 || currentExam == 2){
