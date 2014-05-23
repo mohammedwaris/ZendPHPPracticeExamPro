@@ -2,14 +2,15 @@
 <html>
    <head>
       <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
-      <script src="http://admit.freeiz.com/zendphp/js/jquery-1.11.1.min.js"></script>
-      <script type="text/javascript" src="http://admit.freeiz.com/zendphp/js/jquery.mobile-1.4.2.min.js"></script>
-      <script src="http://admit.freeiz.com/zendphp/js/jquery.timer.js"></script>
-      <link rel="stylesheet" href="http://admit.freeiz.com/zendphp/css/zendphp.min.css"/>
-      <link rel="stylesheet" href="http://admit.freeiz.com/zendphp/css/jquery.mobile.icons.min.css"/>
-      <link rel="stylesheet" href="http://admit.freeiz.com/zendphp/css/jquery.mobile.structure-1.4.2.min.css"/>
-      <script src="http://admit.freeiz.com/zendphp/js/questions.js"></script>
-      <script src="http://admit.freeiz.com/zendphp/js/questions-api.js"></script>
+      <script src="js/jquery-1.11.1.min.js"></script>
+      <script type="text/javascript" src="js/jquery.mobile-1.4.2.min.js"></script>
+      <script src="js/jquery.timer.js"></script>
+      <link rel="stylesheet" href="css/zendphp.min.css"/>
+      <link rel="stylesheet" href="css/jquery.mobile.icons.min.css"/>
+      <link rel="stylesheet" href="css/jquery.mobile.structure-1.4.2.min.css"/>
+      <script src="js/questions.js"></script>
+      <script src="js/questions-api.js"></script>
+      <script src="cordova.js"></script>
       <script type="text/javascript">
          var questions;
          var currentQuestionNumber;
@@ -19,18 +20,45 @@
          var timer;
 
          function hasConnection(){
-           return true;
+           		var networkState = navigator.connection.type;
+				if(networkState == Connection.NONE){
+					return false;
+				}
+				return true;
          }
          
          document.addEventListener("deviceready", onDeviceReady, false);
-         document.addEventListener("pause", onPause, false);
-         document.addEventListener("resume", onResume, false);
-         document.addEventListener("online", onOnline, false);
 
          function onDeviceReady(){
            if(getPlatform() == 'android'){
              $('#exit-button').removeClass('visibility-hidden');
-           } else if(getPaltform() == 'ios'){
+           } else if(getPlatform() == 'ios'){
+           }
+           
+           document.addEventListener("backbutton", onBackButton, false);
+
+           document.addEventListener("pause", onPause, false);
+           document.addEventListener("resume", onResume, false);
+           document.addEventListener("online", onOnline, false);
+         }
+
+         function onBackButton(){
+
+           currentPage = getCurrentPage();
+           if(currentPage == '#main'){
+				$('#exit-popup').popup('open');
+           }else if(currentPage == '#exam-page'){
+               $('#quitExamPopup').popup('open');
+           }else if(currentPage == '#practice-questions-page'){
+				$.mobile.changePage('#main');
+           }else if(currentPage == '#result-page'){
+		
+           }else if(currentPage == '#answers-page'){
+
+           }else if(currentPage == '#settings-page'){
+		$.mobile.changePage('#main');
+           }else if(currentPage == '#help'){
+		$.mobile.changePage('#main');
            }
          }
 
@@ -169,6 +197,7 @@
              $('#user-last-rank').html(localStorage.getItem('user-rank'));
              $('#user-last-score').html(localStorage.getItem('user-score') + '%');
              $('#user-last-time-taken').html(localStorage.getItem('time-taken') + ' min');
+             $('#user-last-exam-date').html(localStorage.getItem('exam-date'));
            }
          });// end of document.ready
          
@@ -369,7 +398,7 @@
 
             time_taken = (time_taken/60).toFixed(2);
 
-            per = (correct/total_ques)*100;
+            per = ((correct/total_ques)*100).toFixed(2);
             d = '<table class="result-table" style="width:100%;">' + 
                    '<tr>' + 
                       '<td>' + '<b>Total Questions</b>' + '</td>' +
@@ -383,15 +412,17 @@
                       '<td>' + '<b>Time Taken</b>' + '</td>' +
                       '<td>' + time_taken + ' min </td>' +  
                    '</tr>' +
-                   '<tr>' + 
-                      '<td>' + '<b>Score</b>' + '</td>' +
-                      '<td>' + per + '%' + '</td>' +  
-                   '</tr>' +
                  '</table>';
                   
             $('#virtual-exam-result-stats').html(d);
+            $('#result-inner-bar').css('width', per + '%');
+            $('#result-per-text').html('Score: ' + per + '%');
+
+            dt = new Date();
+            dt_str = dt.getDate() + "-" + getMonthString(dt.getMonth()) + "-" + dt.getFullYear();
+
             $('#virtual-exam-rank').html('');
-            if(currentExam == 1){ //if exam is a vitual exam then only get the rank
+            if(currentExam == 1){ //if exam is a virtual exam then only get the rank
                if(localStorage.getItem("user-name")){
                   user_name = localStorage.getItem("user-name");
                   user_email = localStorage.getItem("user-email");
@@ -420,21 +451,25 @@
                                     localStorage.setItem('user-score', per);
                                     localStorage.setItem('user-rank', response.msg);
                                     localStorage.setItem('time-taken', time_taken);
+                                    localStorage.setItem('exam-date', dt_str); 
                                     d = '<p>Your rank</p>';
                                     d = d + '<h3>' + response.msg + '</h3>';
                                     $('#virtual-exam-rank').html(d);
                                     $('#user-last-rank').html(response.msg);
                                     $('#user-last-score').html(per + '%');
                                     $('#user-last-time-taken').html(time_taken + ' min');
+                                    $('#user-last-exam-date').html(dt_str);
                                     $('#user-last-result-div').removeClass('display-none');
                                  },
                         error: function(e){
                                     localStorage.setItem('user-score', per);
                                     localStorage.setItem('user-rank', '-');
                                     localStorage.setItem('time-taken', time_taken);
+                                    localStorage.setItem('exam-date', dt_str); 
                                     $('#user-last-rank').html('-');
                                     $('#user-last-score').html(per + '%');
                                     $('#user-last-time-taken').html(time_taken + ' min');
+                                    $('#user-last-exam-date').html(dt_str);
                                     $('#user-last-result-div').removeClass('display-none');
                         }
                   });
@@ -442,14 +477,47 @@
                   localStorage.setItem('user-score', per);
                   localStorage.setItem('user-rank', '-');
                   localStorage.setItem('time-taken', time_taken);
+                  localStorage.setItem('exam-date', dt_str); 
                   $('#user-last-rank').html('-');
                   $('#user-last-score').html(per + '%');
                   $('#user-last-time-taken').html(time_taken + ' min');
+                  $('#user-last-exam-date').html(dt_str);
                   $('#user-last-result-div').removeClass('display-none');
                }
             }
 
             $.mobile.changePage('#result-page');
+         }
+ 
+         function getMonthString(m){
+           m++;
+           if(m == 1){
+             str = 'Jan';
+           }else if(m == 2){
+             str = 'Feb';
+           }else if(m == 3){
+             str = 'Mar';
+           }else if(m == 4){
+             str = 'Apr';
+           }else if(m == 5){
+             str = 'May';
+           }else if(m == 6){
+             str = 'Jun';
+           }else if(m == 7){
+             str = 'Jul';
+           }else if(m == 8){
+             str = 'Aug';
+           }else if(m == 9){
+             str = 'Sep';
+           }else if(m == 10){
+             str = 'Oct';
+           }else if(m == 11){
+             str = 'Nov';
+           }else if(m == 12){
+             str = 'Dec';
+           }
+
+           return str;
          }
 
          function gotoAnswersPage(){
@@ -573,7 +641,14 @@
 
 
          function getPlatform(){
-           platform = 'android';
+           platform = 'Unknown';
+           if(device.platform == "Android"){
+              platform = 'android';
+           }else if(device.platform == "iOS"){
+              platform = 'ios';
+           }
+
+           //platform = 'android';
            //platform = 'ios';
            //platform = 'blackberry';
            //platform = 'windowsphone';
@@ -771,8 +846,8 @@
                     for(i=0;i<response.length;i++){
                        data = data + '<tr>';
                        data = data + '<td rowspan="5" style="text-align: center;">' + (i+1) + '</td>';
-                       data = data + '<td style="background-color:#77D4A1"><b>Name</b></td>';
-                       data = data + '<td style="background-color:#77D4A1">' + response[i].user_name + '</td>';
+                       data = data + '<td style="background-color:#98FB98"><b>Name</b></td>';
+                       data = data + '<td style="background-color:#98FB98">' + response[i].user_name + '</td>';
                        data = data + '</tr>';
                        data = data + '<tr>';
                        data = data + '<td><b>Score</b></td>';
@@ -804,9 +879,9 @@
 
 
         function getUUID(){
-          uuid = 'xyz';
-          return uuid;
+          return device.uuid;
         }
+
         function onClickOkButtonMissingUserDetailsPopup(){
           $('#missingUserDetailsPopup').popup('close');
         }
@@ -848,16 +923,31 @@
          .top-rankers-table th{
             background-color: #77D4F6;
          }
+         #user-last-result-div{
+            border: 0px solid;
+            border-radius: 10px;
+         }
          .last-result-table{
             width: 100%;
             border-collapse: collapse;
          }
          .last-result-table td, .last-result-table th{
             border: 1px solid #02ACF2;
+            border-radius: 0px;
          }
 
          .last-result-table th{
             background-color: #77D4F6;
+         }
+
+         #result-outer-bar{
+          width: 100%;
+          height: 20px;
+          background-color: #000000;
+         }
+         #result-inner-bar{
+          height: 100%;
+          background-color: green;
          }
 
       </style>
@@ -877,7 +967,7 @@
          </div>     
          <div data-role="content">
             <div id="user-last-result-div" class="display-none">
-               <table border="1" class="last-result-table">
+               <table class="last-result-table">
                   <tr>
                      <th colspan="3">Last Result</th>
                   </tr>
@@ -886,13 +976,17 @@
                      <th colspan="2">&nbsp;</th>
                   </tr>
                   <tr>
-                     <td rowspan="2"><p style="text-align:center;" id="user-last-rank">&nbsp;</p></td>
+                     <td rowspan="3"><p style="text-align:center;" id="user-last-rank">&nbsp;</p></td>
                      <td><b>Score</b></td>                     
                      <td><span id="user-last-score">&nbsp;</span></td>                     
                   </tr>
                   <tr>
                      <td><b>Time Taken</b></td>                     
                      <td><span id="user-last-time-taken">&nbsp;</span></td>                     
+                  </tr>
+                  <tr>
+                     <td><b>Date</b></td>                     
+                     <td><span id="user-last-exam-date"></span></td>                     
                   </tr>
                </table>
             </div>
@@ -909,7 +1003,7 @@
 
       <!-- Virtual Exam and Short Exam-->
       <div id="exam-page" data-role="page">
-         <div data-role="header" data-position="fixed">
+         <div data-role="header" data-position="fixed" data-tap-toggle="false">
             <h1 id="exam-page-title">Virtual Exam</h1>
             <a href="javascript: onClickQuitExamButton()" data-role="button">Quit</a> 
             <a href="javascript: onClickShowExamResultButton()" data-role="button">Show Result</a> 
@@ -1030,7 +1124,7 @@
 
       <!-- TOp rankers page -->
       <div id="top-rankers-page" data-role="page">
-         <div data-role="header">
+         <div data-role="header" data-tap-toggle="false" data-position="fixed">
             <h1>Top Rankers</h1>
             <a href="#main" data-role="button">Back</a> 
          </div>
@@ -1040,7 +1134,7 @@
 
       <!-- Settings page -->
       <div id="settings-page" data-role="page">
-         <div data-role="header">
+         <div data-role="header" data-tap-toggle="false" data-position="fixed">
             <h1>Settings</h1>
             <a href="#main" data-role="button">Back</a> 
             <div data-role="popup" data-history="false" id="missingUserDetailsPopup" data-position-to="window"  data-dismissible="false">
@@ -1071,25 +1165,56 @@
 
       <!-- Help page -->
       <div id="help" data-role="page">
-         <div data-role="header">
+         <div data-role="header" data-tap-toggle="false" data-position="fixed">
             <h1>Help</h1>
             <a href="#main" data-role="button">Back</a> 
          </div>
          <div data-role="content">
+            <h3>Virtual Exam</h3>
             <ul>
-               <li>Virtual Exam section contains 70 multiple choice questions, you have to complete it within 90 minutes.</li>
+               <li>You will get 70 questions to solve in 90 minutes.</li>
+               <li>Try to score as much as possible.</li>
+               <li>You can quit the exam anytime with the QUIT button</li>
+               <li>After completing the exam press the SHOW RESULT button to view your score.</li>
+               <li>You can also view your rank after completing the exam.</li>
+            </ul>
+            <h3>Short Exam</h3>
+            <ul>
+               <li>You will get 10 questions to solve in 12 minutes.</li>
+               <li>You can quit the exam anytime with the QUIT button</li>
+               <li>After completing the exam press the SHOW RESULT button to view your score.</li>
+            </ul>
+            <h3>Practice Questions</h3>
+            <ul>
+               <li>Question to practising for Zend PHP certification.</li>
+               <li>Slider at the bottom of the question to check your answers.</li>
+            </ul>
+            <h3>Top Rankers</h3>
+            <ul>
+               <li>List of top rankers.</li>
+            </ul>
+            <h3>Settings</h3>
+            <ul>
+               <li>Fill and submit your details in this section to know your rank when you complete the virtual exam.</li>
+               <li>Rank is only available for virtual exam and not for short exam.</li>
             </ul>
          </div>
       </div>
 
       <!-- Result page -->
       <div id="result-page" data-role="page">
-         <div data-role="header">
+         <div data-role="header" data-tap-toggle="false" data-position="fixed">
             <h1>Result</h1>
             <a href="#main" data-role="button">Okay</a>
             <a href="javascript: gotoAnswersPage()" data-role="button">Show Answers</a> 
          </div>
          <div data-role="content" id="result-page-content">
+            <div id="result-outer-bar">
+               <div id="result-inner-bar">
+               </div>
+            </div>
+            <div id="result-per-text" style="font-weight:bold;text-align:center;width:100%;"></div>
+            <br/>
             <div id="virtual-exam-result-stats"></div>
             <div id="virtual-exam-rank" style="text-align:center;"></div>
          </div>
