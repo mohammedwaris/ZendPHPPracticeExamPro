@@ -56,9 +56,11 @@
            }else if(currentPage == '#answers-page'){
 
            }else if(currentPage == '#settings-page'){
-		$.mobile.changePage('#main');
+				$.mobile.changePage('#main');
            }else if(currentPage == '#help'){
-		$.mobile.changePage('#main');
+				$.mobile.changePage('#main');
+           }else if(currentPage == '#top-rankers-page'){
+				$.mobile.changePage('#main');
            }
          }
 
@@ -532,9 +534,9 @@
               d = d + '<b>C. </b>' + questions[i].option3 + '<br/>';
               d = d + '<b>D. </b>' + questions[i].option4 + '<br/>';
               d = d + '<b>E. </b>' + questions[i].option5 + '<br/><br/>';
-              correct_str = '';
+              correct_str = questions[i].answer;
 
-                 for(j=0;j<questions[i].answer.length;j++){
+                 /*for(j=0;j<questions[i].answer.length;j++){
                     str = questions[i].answer.charAt(j);
                     correct_str = correct_str + str;
                 
@@ -544,8 +546,7 @@
                     }else{
                        correct_str = correct_str + ' and ';
                     }
-                
-                }
+                }*/
      
               if(answers[i] == undefined){
                  d = d + '<span style="font-weight:bold">You have answered NONE</span><br/><br/>';
@@ -661,7 +662,7 @@
          }
 
          function onClickYesButtonExitPopup(){
-           navigator.app.exit();
+           navigator.app.exitApp();
          }
 
          function onClickNoButtonExitPopup(){
