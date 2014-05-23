@@ -683,9 +683,13 @@
            $('#practice-questions-previous-button').addClass('visibility-hidden');           
            $('#practice-questions-next-button').removeClass('visibility-hidden');   
            $('#practice-questions-ques-num').val('');
+           
+           $("#practice-questions-toggle-answer").val('off').slider('refresh');
+           $('#practice-questions-answer-info').addClass('display-none');
+           $('#practice-questions-explanation').addClass('display-none');
   
            answers = new Array();     
-	   $.mobile.changePage('#practice-questions-page');
+	   		$.mobile.changePage('#practice-questions-page');
            uncheckPracticeQuestionsCheckboxes();
 
 
