@@ -30,6 +30,8 @@
          document.addEventListener("deviceready", onDeviceReady, false);
 
          function onDeviceReady(){
+         	getRankIfNA();
+         	
            if(getPlatform() == 'android'){
              $('#exit-button').removeClass('visibility-hidden');
            } else if(getPlatform() == 'ios'){
@@ -122,7 +124,7 @@
 
          $(document).ready(function(){
          
-         	getRankIfNA();
+         	
 
            $('input[type=checkbox]').click(function(){
              if(currentExam == 1 || currentExam == 2){
