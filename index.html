@@ -117,8 +117,6 @@
 
          $(document).ready(function(){
 
-         onDeviceReady();
-
            $('input[type=checkbox]').click(function(){
              if(currentExam == 1 || currentExam == 2){
                 if($('#exam-response-a').is(':checked') == true)
@@ -173,7 +171,7 @@
 
            $('#practice-questions-toggle-answer').bind('change', function(){
               v = $(this).val();
-
+              
               if(v == 'on'){
                 n = currentQuestionNumber - 1;
                 d = '';
